@@ -128,7 +128,8 @@ You can improve:
 - error handling  
 - scraping performance  
 - multi-profile scheduling  
-- UI rendering  
+- UI rendering
+- Push Notification for new post
 
 ---
 
