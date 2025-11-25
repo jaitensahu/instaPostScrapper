@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Instagram User Viewer</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #fafafa;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .user-card {
+        background: white;
+        padding: 20px;
+        margin-bottom: 40px;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .profile-header img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #ddd;
+      }
+
+      .stats {
+        display: flex;
+        gap: 20px;
+        margin-top: 10px;
+      }
+
+      .posts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .post-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 10px;
+        box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .post-card img,
+      .post-card video {
+        width: 100%;
+        border-radius: 10px;
+      }
+
+      .caption {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #333;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Instagram Data Viewer</h1>
+
+    <div id="app"></div>
+
+    <script>
+      async function loadData() {
+        const res = await fetch("hello.json");
+        const users = await res.json(); // <== ARRAY OF USERS
+
+        const app = document.getElementById("app");
+
+        users.forEach((user) => {
+          const userDiv = document.createElement("div");
+          userDiv.className = "user-card";
+          console.debug("Rendering profile:", user.profilePic);
+          userDiv.innerHTML = `
+          <div class="profile-header">
+            <img src="http://localhost:3000/proxy?url=${encodeURIComponent(
+              user.profilePic
+            )}" alt="Profile Picture" />
+            <div>
+              <h2>${user.fullName}</h2>
+              <strong>@${user.username}</strong>
+              <p>${user.bio.replace(/\n/g, "<br>")}</p>
+
+              <div class="stats">
+                <span><b>Followers:</b> ${user.followers}</span>
+                <span><b>Following:</b> ${user.following}</span>
+                <span><b>Posts:</b> ${user.posts.length}</span>
+              </div>
+            </div>
+          </div>
+
+          <h3 style="margin-top:30px;">Posts</h3>
+          <div class="posts-grid" id="posts-${user.username}"></div>
+        `;
+
+          app.appendChild(userDiv);
+
+          const postsContainer = document.getElementById(
+            `posts-${user.username}`
+          );
+
+          user.posts.forEach((post) => {
+            const postDiv = document.createElement("div");
+            postDiv.className = "post-card";
+
+            let mediaElement = "";
+
+            if (post.isVideo) {
+              mediaElement = `
+              <video controls>
+                <source src="${post.videoUrl}" type="video/mp4">
+              </video>
+            `;
+            } else {
+              mediaElement = `
+    <img src="http://localhost:3000/proxy?url=${encodeURIComponent(
+      post.imageUrl
+    )}"
+         alt="Post Image"
+         referrerpolicy="no-referrer" />
+  `;
+            }
+
+            postDiv.innerHTML = `
+            ${mediaElement}
+            <div class="caption">${post.caption ?? ""}</div>
+          `;
+
+            postsContainer.appendChild(postDiv);
+          });
+        });
+      }
+
+      loadData();
+    </script>
+  </body>
+</html>
